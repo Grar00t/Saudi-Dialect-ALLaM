@@ -45,12 +45,14 @@ Use your own dataset in **JSON Lines** (`.jsonl`) with the following fields:
 ## Formatting regimes
 
 ### Dialect-Token
-Prepend `<HIJAZI>` or `<NAJDI>` to the instruction at training time.
+Prepend `<DIALECT=HIJAZI>` or `<DIALECT=NAJDI>` to the instruction at training time.
 
 **Example JSONL:**
 ```jsonl
-{"instruction": "<HIJAZI> ...", "response": "...", "dialect": "HIJAZI"}
-{"instruction": "<NAJDI> ...", "response": "...", "dialect": "NAJDI"}
+{"instruction": "<DIALECT=HIJAZI> ...", "response": "...", "dialect": "HIJAZI"}
+{"instruction": "<DIALECT=NAJDI> ...", "response": "...", "dialect": "NAJDI"}
+
+> The `<DIALECT=...>` syntax matches the tag format produced and consumed by the repository's data and training utilities.
 ```
 ### No-Token
 
