@@ -62,15 +62,18 @@ def get_topic(obj) -> str:
     return str(meta.get("topic", "")).strip()
 
 def read_jsonl(path: Path):
+    """Yield non-empty JSONL records and fail closed on malformed JSON."""
     with path.open("r", encoding="utf-8") as f:
-        for line in f:
+        for line_no, line in enumerate(f, start=1):
             line = line.strip()
             if not line:
                 continue
             try:
                 yield json.loads(line)
-            except Exception:
-                continue
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"{path}:{line_no}: invalid JSON: {exc.msg}"
+                ) from exc
 
 def write_jsonl(path: Path, rows):
     with path.open("w", encoding="utf-8") as f:
