@@ -51,9 +51,10 @@ Prepend `<DIALECT=HIJAZI>` or `<DIALECT=NAJDI>` to the instruction at training t
 ```jsonl
 {"instruction": "<DIALECT=HIJAZI> ...", "response": "...", "dialect": "HIJAZI"}
 {"instruction": "<DIALECT=NAJDI> ...", "response": "...", "dialect": "NAJDI"}
+```
 
 > The `<DIALECT=...>` syntax matches the tag format produced and consumed by the repository's data and training utilities.
-```
+
 ### No-Token
 
 Omit explicit tags.
