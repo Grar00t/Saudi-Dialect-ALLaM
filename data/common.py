@@ -18,7 +18,9 @@ BANNED_TOPICS = {
 }
 
 # ---------- Regex / helpers ----------
-TAG_RE = re.compile(r'^\s*<\s*DIALECT\s*=\s*(HIJAZI|NAJDI)\s*>\s*', re.IGNORECASE)
+# Accept both documented short tags (<HIJAZI>/<NAJDI>) and the canonical
+# control form emitted by step_add_tags (<DIALECT=HIJAZI>/<DIALECT=NAJDI>).
+TAG_RE = re.compile(r'^\s*<\s*(?:DIALECT\s*=\s*)?(HIJAZI|NAJDI)\s*>\s*', re.IGNORECASE)
 
 def strip_cf(s: str) -> str:
     """Strip zero-width/formatting controls (avoid hidden characters)."""
