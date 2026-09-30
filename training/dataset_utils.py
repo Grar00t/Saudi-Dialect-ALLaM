@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Dict, Any, Tuple
 from datasets import Dataset
 
-# Match a LEADING dialect control tag
-TAG_RE = re.compile(r'^\s*<\s*DIALECT\s*=\s*(HIJAZI|NAJDI)\s*>\s*', re.IGNORECASE)
+# Match either documented short tags (<HIJAZI>/<NAJDI>) or the canonical
+# <DIALECT=...> form at the beginning of an instruction.
+TAG_RE = re.compile(r'^\s*<\s*(?:DIALECT\s*=\s*)?(HIJAZI|NAJDI)\s*>\s*', re.IGNORECASE)
 EOS = "</s>"
 
 def load_jsonl(path: Path) -> Dataset:
