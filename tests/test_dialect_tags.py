@@ -8,7 +8,7 @@ if "datasets" not in sys.modules:
     datasets_stub.Dataset = object
     sys.modules["datasets"] = datasets_stub
 
-from data.common import TAG_RE
+from data.common import DIALECT_TAG_RE, TAG_RE
 from training.dataset_utils import fmt_no_token_counter
 
 
@@ -31,6 +31,11 @@ class DialectTagTests(unittest.TestCase):
 
     def test_parser_leaves_other_tags_untouched(self):
         self.assertEqual(TAG_RE.sub("", "<MSA> hello"), "<MSA> hello")
+
+    def test_echo_matcher_finds_both_forms_anywhere(self):
+        self.assertIsNotNone(DIALECT_TAG_RE.search("reply <HIJAZI> text"))
+        self.assertIsNotNone(DIALECT_TAG_RE.search("reply <DIALECT=NAJDI> text"))
+        self.assertIsNone(DIALECT_TAG_RE.search("reply <MSA> text"))
 
 
 if __name__ == "__main__":
