@@ -1,5 +1,6 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
+from data.generation_contract import decode_new_tokens, validate_generation_budget
 import torch
 BASE_MODEL = "ALLaM-AI/ALLaM-7B-Instruct-preview"
 ADAPTER_DIR = "outputs/allam7b-lora-token"
@@ -28,8 +29,9 @@ def load_with_adapter(adapter_dir):
 def generate(model, tokenizer, instruction, max_new_tokens=160, temperature=0.7, top_p=0.95):
     prompt = f"### Instruction:\n{instruction}\n\n### Response:\n"
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    prompt_length = inputs["input_ids"].shape[-1]
+    validate_generation_budget(prompt_length, max_new_tokens, model.config.max_position_embeddings)
     with torch.no_grad():
         out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=True,
                              temperature=temperature, top_p=top_p)
-    txt = tokenizer.decode(out[0], skip_special_tokens=True)
-    return txt.split("### Response:\n",1)[-1].strip()
+    return decode_new_tokens(tokenizer, out[0], prompt_length)

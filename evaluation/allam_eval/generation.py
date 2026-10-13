@@ -7,6 +7,7 @@ from tqdm.auto import tqdm
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
+from data.generation_contract import decode_new_tokens, validate_generation_budget
 
 from data.common import TAG_RE
 from .adapter_contract import load_required_adapter
@@ -52,9 +53,10 @@ def generate_for_model(rows_to_use: List[dict], name: str, adapter_dir: str | No
             if strip_tag:
                 instr = TAG_RE.sub("", instr).lstrip()
             inputs = tok(build_prompt(instr), return_tensors="pt").to(model.device)
+            prompt_length = inputs["input_ids"].shape[-1]
+            validate_generation_budget(prompt_length, gen_kwargs["max_new_tokens"], model.config.max_position_embeddings)
             out = model.generate(**inputs, **gen_kwargs)
-            text = tok.decode(out[0], skip_special_tokens=True)
-            resp = text.split("### Response:", 1)[-1].strip()
+            resp = decode_new_tokens(tok, out[0], prompt_length)
             preds.append({
                 "prompt": instr,
                 "gold": ex.get("response", ""),
