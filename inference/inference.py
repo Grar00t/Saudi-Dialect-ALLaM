@@ -15,6 +15,7 @@ import argparse
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
+from data.generation_contract import decode_new_tokens, validate_generation_budget
 
 from data.common import TAG_RE
 
@@ -105,6 +106,8 @@ def generate(model, tokenizer, instruction, *,
              max_new_tokens=160, temperature=0.7, top_p=0.95, top_k=50, repetition_penalty=1.05):
     prompt = build_prompt(instruction)
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    prompt_length = inputs["input_ids"].shape[-1]
+    validate_generation_budget(prompt_length, max_new_tokens, model.config.max_position_embeddings)
     out = model.generate(
         **inputs,
         max_new_tokens=max_new_tokens,
@@ -116,8 +119,7 @@ def generate(model, tokenizer, instruction, *,
         pad_token_id=tokenizer.pad_token_id,
         eos_token_id=tokenizer.eos_token_id,
     )
-    txt = tokenizer.decode(out[0], skip_special_tokens=True)
-    return txt.split("### Response:\n", 1)[-1].strip()
+    return decode_new_tokens(tokenizer, out[0], prompt_length)
 
 def clear_mem():
     gc.collect()
